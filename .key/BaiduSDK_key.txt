@@ -1,7 +1,10 @@
 账号侃家百度账号
 
+应用编号:
+18242022
+
 应用 ak:
-taMjfjPGT0b1KsUSfhdyTjKhi6GEydGp
+0HKxSkbiLgQghDRI1pv2LC1ctt6paGAL
 
 包名:
 baidumapsdk.demo
