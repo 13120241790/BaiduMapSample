@@ -2,25 +2,148 @@ package baidumapsdk.demo;
 
 import android.Manifest;
 import android.os.Bundle;
+import android.util.Log;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.baidu.mapapi.map.BaiduMap;
+import com.baidu.mapapi.map.BitmapDescriptor;
+import com.baidu.mapapi.map.BitmapDescriptorFactory;
+import com.baidu.mapapi.map.MapPoi;
+import com.baidu.mapapi.map.MapStatus;
 import com.baidu.mapapi.map.MapView;
+import com.baidu.mapapi.map.Marker;
+import com.baidu.mapapi.map.MarkerOptions;
+import com.baidu.mapapi.map.PolylineOptions;
+import com.baidu.mapapi.model.LatLng;
+import com.baidu.mapapi.utils.DistanceUtil;
+
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
 
 import pub.devrel.easypermissions.EasyPermissions;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements BaiduMap.OnMapLoadedCallback, BaiduMap.OnMapStatusChangeListener, BaiduMap.OnMarkerClickListener, BaiduMap.OnMapClickListener {
+
+    public static final String TAG = MainActivity.class.getSimpleName();
 
     private MapView mMapView = null;
+    private BaiduMap mBaiduMap;
+    private List<MarkerOptions> pointList = new LinkedList<>();
+    private List<PolylineOptions> lineList = new LinkedList<>();
+    private double sum;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        requestPermission();
         //获取地图控件引用
         mMapView = (MapView) findViewById(R.id.bmapView);
+        mBaiduMap = mMapView.getMap();
+        mBaiduMap.getUiSettings().setRotateGesturesEnabled(false);
+        //地图加载完的监听
+        mBaiduMap.setOnMapLoadedCallback(this);
+
+    }
 
 
+    @Override
+    public void onMapLoaded() {
+        //地图状态变化监听
+        mBaiduMap.setOnMapStatusChangeListener(this);
+        //Marker 被点击监听
+        mBaiduMap.setOnMarkerClickListener(this);
+        //点击地图监听
+        mBaiduMap.setOnMapClickListener(this);
+    }
+
+    @Override
+    public void onMapStatusChangeStart(MapStatus mapStatus) {
+
+    }
+
+    @Override
+    public void onMapStatusChangeStart(MapStatus mapStatus, int i) {
+
+    }
+
+    @Override
+    public void onMapStatusChange(MapStatus mapStatus) {
+
+    }
+
+    @Override
+    public void onMapStatusChangeFinish(MapStatus mapStatus) {
+        Log.e(TAG, "onMapStatusChangeFinish zoom: " + mapStatus.zoom);
+    }
+
+    @Override
+    public boolean onMarkerClick(Marker marker) {
+        return true;
+    }
+
+
+    @Override
+    public void onMapClick(LatLng latLng) {
+        Log.e(TAG, "onMapClick LatLng: " + latLng.toString());
+
+
+        pointList.add(drawPoint(latLng));
+
+        if (pointList.size() > 1) {
+            MarkerOptions lastPoint = pointList.get(pointList.size() - 1);
+            lineList.add(drawLine(pointList.get(pointList.size() - 2).getPosition(), lastPoint.getPosition()));
+
+
+            PolylineOptions polylineOptions = lineList.get(lineList.size() - 1);
+            Bundle bundle = polylineOptions.getExtraInfo();
+            Double d = bundle.getDouble("m");
+
+            sum += d;
+
+            DistanceView distanceView = new DistanceView(this);
+            distanceView.setDistance(sum);
+
+            BitmapDescriptor bitmapDescriptor = BitmapDescriptorFactory.fromView(distanceView);
+            MarkerOptions markerOptions = new MarkerOptions().position(lastPoint.getPosition()).icon(bitmapDescriptor);
+            mBaiduMap.addOverlay(markerOptions);
+        }
+
+    }
+
+    private MarkerOptions drawPoint(LatLng point) {
+        BitmapDescriptor bitmap = BitmapDescriptorFactory.fromResource(R.mipmap.ic_point);
+        MarkerOptions option = new MarkerOptions()
+                .position(point)
+                .icon(bitmap);
+        mBaiduMap.addOverlay(option);
+        return option;
+    }
+
+    private PolylineOptions drawLine(LatLng start, LatLng end) {
+        List<LatLng> line = new ArrayList<>();
+        line.add(start);
+        line.add(end);
+
+        PolylineOptions polylineOptions = new PolylineOptions()
+                .width(3)
+                .color(0xAAFF0000)
+                .points(line);
+        mBaiduMap.addOverlay(polylineOptions);
+        Bundle bundle = new Bundle();
+        bundle.putDouble("m", DistanceUtil.getDistance(start, end));
+        polylineOptions.extraInfo(bundle);
+        return polylineOptions;
+    }
+
+    @Override
+    public void onMapPoiClick(MapPoi mapPoi) {
+
+    }
+
+    private void requestPermission() {
         String[] perms = {
                 Manifest.permission.READ_EXTERNAL_STORAGE,
                 Manifest.permission.WRITE_EXTERNAL_STORAGE,
@@ -37,7 +160,6 @@ public class MainActivity extends AppCompatActivity {
             EasyPermissions.requestPermissions(this, "运行时权限请求",
                     1, perms);
         }
-
     }
 
     @Override
@@ -68,5 +190,4 @@ public class MainActivity extends AppCompatActivity {
         // Forward results to EasyPermissions
         EasyPermissions.onRequestPermissionsResult(requestCode, permissions, grantResults, this);
     }
-
 }
