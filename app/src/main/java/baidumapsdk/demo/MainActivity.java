@@ -3,6 +3,10 @@ package baidumapsdk.demo;
 import android.Manifest;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
+import android.widget.ImageView;
+import android.widget.RelativeLayout;
+import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -33,19 +37,76 @@ public class MainActivity extends AppCompatActivity implements BaiduMap.OnMapLoa
     private List<MarkerOptions> pointList = new LinkedList<>();
     private List<PolylineOptions> lineList = new LinkedList<>();
     private double sum;
+    private TextView mRulerTextView;
+    private boolean ruleMode;
+    private RelativeLayout tool;
+    private ImageView close;
+    private ImageView back;
+    private ImageView clean;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         requestPermission();
+
+        mRulerTextView = findViewById(R.id.ruler);
+        tool = findViewById(R.id.ruler_tool);
+        close = findViewById(R.id.ruler_close);
+        clean = findViewById(R.id.ruler_clean);
+        back = findViewById(R.id.ruler_back);
         //获取地图控件引用
         mMapView = (MapView) findViewById(R.id.bmapView);
         mBaiduMap = mMapView.getMap();
+        mMapView.showZoomControls(false);
         mBaiduMap.getUiSettings().setRotateGesturesEnabled(false);
         //地图加载完的监听
         mBaiduMap.setOnMapLoadedCallback(this);
+        mRulerTextView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                ruleMode = true;
+                mRulerTextView.setVisibility(View.GONE);
+                tool.setVisibility(View.VISIBLE);
+                clean();
+            }
+        });
+        close.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mBaiduMap.clear();
+                ruleMode = false;
+                mRulerTextView.setVisibility(View.VISIBLE);
+                tool.setVisibility(View.GONE);
+                clean();
+            }
+        });
+        clean.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mBaiduMap.clear();
+                clean();
+            }
+        });
+        back.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                back();
+            }
+        });
 
+    }
+
+    private void back() {
+        if (lineList.size() > 0) {
+            MarkerOptions lastPoint = pointList.get(pointList.size() - 1);
+            PolylineOptions lastLine = lineList.get(lineList.size() - 1);
+
+            lastPoint.visible(false);
+            lastLine.visible(false);
+            pointList.remove(lastPoint);
+            lineList.remove(lastLine);
+        }
     }
 
 
@@ -84,11 +145,13 @@ public class MainActivity extends AppCompatActivity implements BaiduMap.OnMapLoa
         return true;
     }
 
-
     @Override
     public void onMapClick(LatLng latLng) {
         Log.e(TAG, "onMapClick LatLng: " + latLng.toString());
 
+        if (!ruleMode) {
+            return;
+        }
 
         pointList.add(drawPoint(latLng));
 
@@ -111,6 +174,12 @@ public class MainActivity extends AppCompatActivity implements BaiduMap.OnMapLoa
             mBaiduMap.addOverlay(markerOptions);
         }
 
+    }
+
+    private void clean() {
+        mBaiduMap.clear();
+        lineList.clear();
+        pointList.clear();
     }
 
     private MarkerOptions drawPoint(LatLng point) {
