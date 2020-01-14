@@ -1,6 +1,7 @@
 package baidumapsdk.demo;
 
 import android.Manifest;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -142,6 +143,7 @@ public class MainActivity extends AppCompatActivity implements BaiduMap.OnMapLoa
 
     @Override
     public boolean onMarkerClick(Marker marker) {
+        Log.e(TAG, "onMarkerClick: " + marker.getPosition());
         return true;
     }
 
@@ -157,6 +159,7 @@ public class MainActivity extends AppCompatActivity implements BaiduMap.OnMapLoa
 
         if (pointList.size() > 1) {
             MarkerOptions lastPoint = pointList.get(pointList.size() - 1);
+
             lineList.add(drawLine(pointList.get(pointList.size() - 2).getPosition(), lastPoint.getPosition()));
 
 
@@ -171,6 +174,8 @@ public class MainActivity extends AppCompatActivity implements BaiduMap.OnMapLoa
 
             BitmapDescriptor bitmapDescriptor = BitmapDescriptorFactory.fromView(distanceView);
             MarkerOptions markerOptions = new MarkerOptions().position(lastPoint.getPosition()).icon(bitmapDescriptor);
+            markerOptions.yOffset(40);
+
             mBaiduMap.addOverlay(markerOptions);
         }
 
@@ -180,12 +185,14 @@ public class MainActivity extends AppCompatActivity implements BaiduMap.OnMapLoa
         mBaiduMap.clear();
         lineList.clear();
         pointList.clear();
+        sum = 0;
     }
 
     private MarkerOptions drawPoint(LatLng point) {
         BitmapDescriptor bitmap = BitmapDescriptorFactory.fromResource(R.mipmap.ic_point);
         MarkerOptions option = new MarkerOptions()
                 .position(point)
+                .anchor(0.5f, 0.5f)
                 .icon(bitmap);
         mBaiduMap.addOverlay(option);
         return option;
@@ -197,8 +204,8 @@ public class MainActivity extends AppCompatActivity implements BaiduMap.OnMapLoa
         line.add(end);
 
         PolylineOptions polylineOptions = new PolylineOptions()
-                .width(3)
-                .color(0xAAFF0000)
+                .width(4)
+                .color(Color.parseColor("#1296db"))
                 .points(line);
         mBaiduMap.addOverlay(polylineOptions);
         Bundle bundle = new Bundle();
