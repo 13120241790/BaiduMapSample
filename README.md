@@ -26,7 +26,9 @@
 
 
 
-Depend:
+Dependency :
+
+
 
 app/libs/BaiduLBS_Android.jar
 
