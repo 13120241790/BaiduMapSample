@@ -26,6 +26,14 @@
 
 
 
+Depend:
+
+app/libs/BaiduLBS_Android.jar
+
+app/libs/armeabi/libBaiduMapSDK_base_v6_1_0.so
+
+app/libs/armeabi/libBaiduMapSDK_map_v6_1_0.so
+
 
 
 //TODO 点击地铁图标无效
