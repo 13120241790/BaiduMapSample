@@ -6,13 +6,13 @@
 
 ## 一、地图测距
 
-![Screenshot_2020-01-14-10-01-47-654_baidumapsdk.demo](images/Screenshot_2020-01-14-10-01-47-654_baidumapsdk.demo.jpg)
+![Screenshot_2020-01-14-10-01-47-654_baidumapsdk.demo](./images/Screenshot_2020-01-14-10-01-47-654_baidumapsdk.demo.jpg)
 
 
 
 #### GIF
 
-![地图测距](images/地图测距.gif)
+![地图测距](./images/地图测距.gif)
 
 
 
@@ -26,9 +26,9 @@
 
 
 
-Dependency :
 
 
+> Dependency 
 
 app/libs/BaiduLBS_Android.jar
 
